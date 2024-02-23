@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Помоги Пушкино найти адреса</title>
+    <link href="https://api.mapbox.com/mapbox-gl-js/v3.1.2/mapbox-gl.css" rel="stylesheet" />
+    <script src="https://api.mapbox.com/mapbox-gl-js/v3.1.2/mapbox-gl.js"></script>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+      }
+      #map {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+    <script>
+      mapboxgl.accessToken =
+        "pk.eyJ1IjoidHJ1ZXNwZWFybWludCIsImEiOiJja21xZnRjcG4wN25oMndtcWFoaTgwbHU0In0.MZ_KaXzPzUaXzqGq1sRZRg";
+      const map = new mapboxgl.Map({
+        container: "map",
+        center: [37.847164, 56.011318],
+        zoom: 12,
+      });
+
+      map.on("load", function () {
+        map.addSource("pushkino_buildings_without_adrr", {
+          // может быть любое имя
+          type: "vector", // Тип источника данных вашего слоя (может быть vector, raster, geojson и т.д.) ?
+          url: "mapbox://truespearmint.259b4qfx", // Tileset ID из Mapbox Studio Tilesets
+        });
+        map.addLayer({
+          id: "pushkino_buildings_without_adrr_id", // Уникальный идентификатор вашего слоя, можно назначить любым
+          type: "fill", // Тип вашего слоя, например, fill, line, symbol и т.д.
+          source: "pushkino_buildings_without_adrr",
+          "source-layer": "pushkino_buildings_without_ad-50tfyj", // Имя тайлсета. То как называются данные после загрузки
+          layout: { visibility: "visible" },
+          paint: {
+            "fill-color": "#CC397B",
+          },
+        });
+
+        map.on("click", "pushkino_buildings_without_adrr_id", (e) => {
+          // Copy coordinates array.
+          const building_value = e.features[0].properties.building;
+          const building_levels_value = e.features[0].properties.building_levels;
+          const addr_street_value = e.features[0].properties.addr_street;
+          const addr_housenumber_value = e.features[0].properties.addr_housenumber;
+
+          new mapboxgl.Popup()
+            .setLngLat(e.lngLat)
+            .setHTML(
+              "building = " +
+                building_value +
+                "<br>" +
+                "building_levels = " +
+                building_levels_value +
+                "<br>" +
+                "addr_street = " +
+                addr_street_value +
+                "<br>" +
+                "addr_housenumber = " +
+                addr_housenumber_value
+            )
+            .addTo(map);
+        });
+
+        // Change the cursor to a pointer when the mouse is over the places layer.
+        map.on("mouseenter", "pushkino_buildings_without_adrr_id", () => {
+          map.getCanvas().style.cursor = "pointer";
+        });
+
+        // Change it back to a pointer when it leaves.
+        map.on("mouseleave", "pushkino_buildings_without_adrr_id", () => {
+          map.getCanvas().style.cursor = "";
+        });
+      });
+    </script>
+  </body>
+</html>
